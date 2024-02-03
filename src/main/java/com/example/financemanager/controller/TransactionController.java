@@ -5,6 +5,7 @@ import com.example.financemanager.model.TransactionRepository;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
 @RestController
 @RequestMapping("/transactions")
 public class TransactionController {
@@ -24,4 +25,5 @@ public class TransactionController {
     public List<Transaction> getAllTransactions() {
         return transactionRepository.findAll();
     }
+
 }
