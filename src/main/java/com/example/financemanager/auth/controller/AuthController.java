@@ -1,9 +1,11 @@
 package com.example.financemanager.auth.controller;
 
 import com.example.financemanager.auth.model.Customer;
+import com.example.financemanager.auth.model.Login;
 import com.example.financemanager.auth.service.AuthService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,6 +33,16 @@ public class AuthController {
         } catch (Exception e){
             LOGGER.error("Unexpected error trying to register new user:", e);
             return ResponseEntity.badRequest().body("User registration failed");
+        }
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> authenticateUser(@RequestBody Login login) {
+        boolean isAuthenticated = authService.validateUser(login.getUsernameOrEmail(), login.getPassword());
+        if (isAuthenticated) {
+            return ResponseEntity.ok().body("User authenticated successfully");
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username/email or password");
         }
     }
 }

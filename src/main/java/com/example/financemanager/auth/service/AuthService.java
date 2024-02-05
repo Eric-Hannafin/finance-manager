@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class AuthService {
 
@@ -23,5 +25,13 @@ public class AuthService {
         userDetails.setPassword(encodedPassword);
 
         authRepository.save(userDetails);
+    }
+
+    public boolean validateUser(String usernameOrEmail, String password) {
+        Optional<Customer> user = authRepository.findByUsernameOrEmail(usernameOrEmail);
+        if (user.isPresent()) {
+            return bCryptPasswordEncoder.matches(password, user.get().getPassword());
+        }
+        return false;
     }
 }
