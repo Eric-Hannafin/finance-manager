@@ -26,9 +26,9 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody Customer userDetails){
+    public ResponseEntity<String> registerUser(@RequestBody Customer customer){
         try {
-            authService.registerUser(userDetails);
+            authService.registerUser(customer);
             return ResponseEntity.ok("User registered successfully");
         } catch (Exception e){
             LOGGER.error("Unexpected error trying to register new user:", e);
