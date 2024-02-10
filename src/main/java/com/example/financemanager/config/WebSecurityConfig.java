@@ -1,6 +1,8 @@
 package com.example.financemanager.config;
 
+import com.example.financemanager.auth.controller.AuthRepository;
 import com.example.financemanager.auth.util.JwtUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -14,7 +16,11 @@ public class WebSecurityConfig {
 
     private final JwtUtil jwtUtil;
 
-    public WebSecurityConfig(JwtUtil jwtUtil) {
+    @Autowired
+    private AuthRepository authRepository;
+
+    public WebSecurityConfig(JwtUtil jwtUtil, AuthRepository authRepository) {
+        this.authRepository = authRepository;
         this.jwtUtil = jwtUtil;
     }
 
@@ -33,7 +39,7 @@ public class WebSecurityConfig {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        return new JwtAuthenticationFilter(jwtUtil);
+        return new JwtAuthenticationFilter(jwtUtil, authRepository);
     }
 
 

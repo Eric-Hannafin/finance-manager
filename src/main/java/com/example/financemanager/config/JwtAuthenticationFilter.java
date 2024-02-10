@@ -1,20 +1,28 @@
 package com.example.financemanager.config;
 
+import com.example.financemanager.auth.controller.AuthRepository;
+import com.example.financemanager.auth.model.Customer;
 import com.example.financemanager.auth.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Optional;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private JwtUtil jwtUtil;
+    private AuthRepository authRepository;
 
-    public JwtAuthenticationFilter(JwtUtil jwtUtil) {
+    public JwtAuthenticationFilter(JwtUtil jwtUtil, AuthRepository authRepository) {
         this.jwtUtil = jwtUtil;
+        this.authRepository = authRepository;
     }
 
     @Override
@@ -28,6 +36,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
+            Optional<Customer> customer = authRepository.findByUsernameOrEmail("ehannafin");
+            Authentication auth = new UsernamePasswordAuthenticationToken("user", customer, null);
+            SecurityContextHolder.getContext().setAuthentication(auth);
         }
         filterChain.doFilter(request,response);
     }

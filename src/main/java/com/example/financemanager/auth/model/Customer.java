@@ -25,4 +25,7 @@ public class Customer {
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    public String getAccountNumber() {
+        return accountNumber;
+    }
 }
