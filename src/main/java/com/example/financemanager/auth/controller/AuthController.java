@@ -21,10 +21,13 @@ public class AuthController {
 
     private AuthService authService;
     private JwtUtil jwtUtil;
+    private AuthRepository authRepository;
 
-    public AuthController(AuthService authService, JwtUtil jwtUtil) {
+    public AuthController(AuthService authService, JwtUtil jwtUtil, AuthRepository authRepository) {
         this.authService = authService;
         this.jwtUtil = jwtUtil;
+        this.authRepository = authRepository;
+
     }
 
     @PostMapping("/register")
@@ -39,12 +42,12 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public String authenticateUser(@RequestBody Login login) {
+    public ResponseEntity<String> authenticateUser(@RequestBody Login login) {
         boolean isAuthenticated = authService.validateUser(login.getUsernameOrEmail(), login.getPassword());
         if (isAuthenticated) {
-            return jwtUtil.generateToken(login);
+            return ResponseEntity.ok(jwtUtil.createToken(login.getUsernameOrEmail()));
         } else {
-            return "Incorrect username or password was provided";
+            return ResponseEntity.badRequest().body("Failed to login user");
         }
     }
 }
