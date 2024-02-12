@@ -6,13 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 public class AuthService {
 
-    private PasswordEncoder bCryptPasswordEncoder;
-    private AuthRepository authRepository;
+    private final PasswordEncoder bCryptPasswordEncoder;
+    private final AuthRepository authRepository;
 
     @Autowired
     public AuthService(PasswordEncoder bCryptPasswordEncoder, AuthRepository authRepository) {
@@ -28,9 +26,9 @@ public class AuthService {
     }
 
     public boolean validateUser(String usernameOrEmail, String password) {
-        Optional<Customer> user = authRepository.findByUsernameOrEmail(usernameOrEmail);
-        if (user.isPresent()) {
-            return bCryptPasswordEncoder.matches(password, user.get().getPassword());
+        Customer user = authRepository.findByUsernameOrEmail(usernameOrEmail);
+        if (user != null) {
+            return bCryptPasswordEncoder.matches(password, user.getPassword());
         }
         return false;
     }
