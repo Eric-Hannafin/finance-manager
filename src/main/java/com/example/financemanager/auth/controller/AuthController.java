@@ -19,8 +19,8 @@ public class AuthController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthController.class);
 
-    private AuthService authService;
-    private JwtUtil jwtUtil;
+    private final AuthService authService;
+    private final JwtUtil jwtUtil;
 
     public AuthController(AuthService authService, JwtUtil jwtUtil) {
         this.authService = authService;

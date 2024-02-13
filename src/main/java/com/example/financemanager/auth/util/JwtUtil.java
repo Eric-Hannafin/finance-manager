@@ -16,7 +16,7 @@ import java.util.Date;
 public class JwtUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JwtUtil.class);
-    private final long EXPIRATION_TIME = System.currentTimeMillis() + 900_000;
+    private static final long EXPIRATION_TIME = System.currentTimeMillis() + 900_000;
     @Value("${jwt.secret}")
     private String secret;
 

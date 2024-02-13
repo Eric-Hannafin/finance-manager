@@ -2,11 +2,11 @@ package com.example.financemanager.config;
 
 import com.example.financemanager.auth.controller.AuthRepository;
 import com.example.financemanager.auth.util.JwtUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -16,8 +16,7 @@ public class WebSecurityConfig {
 
     private final JwtUtil jwtUtil;
 
-    @Autowired
-    private AuthRepository authRepository;
+    private final AuthRepository authRepository;
 
     public WebSecurityConfig(JwtUtil jwtUtil, AuthRepository authRepository) {
         this.authRepository = authRepository;
@@ -27,7 +26,7 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/login", "/auth/register").permitAll()
                         .anyRequest().authenticated()
