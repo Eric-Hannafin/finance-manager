@@ -21,21 +21,18 @@ public class AuthController {
 
     private AuthService authService;
     private JwtUtil jwtUtil;
-    private AuthRepository authRepository;
 
-    public AuthController(AuthService authService, JwtUtil jwtUtil, AuthRepository authRepository) {
+    public AuthController(AuthService authService, JwtUtil jwtUtil) {
         this.authService = authService;
         this.jwtUtil = jwtUtil;
-        this.authRepository = authRepository;
-
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody Customer customer){
+    public ResponseEntity<String> registerUser(@RequestBody Customer customer) {
         try {
             authService.registerUser(customer);
             return ResponseEntity.ok("User registered successfully");
-        } catch (Exception e){
+        } catch (Exception e) {
             LOGGER.error("Unexpected error while trying to register new user:", e);
             return ResponseEntity.badRequest().body("User registration failed");
         }
