@@ -28,7 +28,6 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Build and analyze with Maven and SonarCloud
-      run: mvn clean install org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+      run: mvn clean install org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=${{ secrets.PROJECT_KEY }} -Dsonar.organization=${{ secrets.ORGANIZATION_KEY }} -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}
       env:
         JWT_SECRET: ${{ secrets.JWT_SECRET }}
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
