@@ -22,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(TransactionController.class)
-public class TransactionControllerTest {
+class TransactionControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -37,7 +37,7 @@ public class TransactionControllerTest {
 
     @Test
     @WithMockUser
-    public void testAddTransaction() throws Exception {
+    void testAddTransaction() throws Exception {
         Transaction transaction = new Transaction();
 
         transaction.setType("DEBIT");
@@ -60,7 +60,7 @@ public class TransactionControllerTest {
 
     @Test
     @WithMockUser
-    public void testGetAllTransactions() throws Exception {
+    void testGetAllTransactions() throws Exception {
         Transaction transaction1 = new Transaction();
         Transaction transaction2 = new Transaction();
         List<Transaction> transactions = Arrays.asList(transaction1, transaction2);
