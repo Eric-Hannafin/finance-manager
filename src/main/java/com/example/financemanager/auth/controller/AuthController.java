@@ -4,6 +4,8 @@ import com.example.financemanager.auth.model.Customer;
 import com.example.financemanager.auth.model.Login;
 import com.example.financemanager.auth.service.AuthService;
 import com.example.financemanager.auth.util.JwtUtil;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -39,12 +41,14 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> authenticateUser(@RequestBody Login login) {
+    public ResponseEntity<String> authenticateUser(@RequestBody Login login, HttpServletResponse response) {
         boolean isAuthenticated = authService.validateUser(login.getUsernameOrEmail(), login.getPassword());
         if (isAuthenticated) {
-            return ResponseEntity.ok(jwtUtil.createToken(login.getUsernameOrEmail()));
+            Cookie cookie = jwtUtil.createToken(login.getUsernameOrEmail());
+            response.addCookie(cookie);
+            return ResponseEntity.ok().body("User authenticated successfully");
         } else {
-            return ResponseEntity.badRequest().body("Failed to login user");
+            return ResponseEntity.status(401).body("Failed to login user");
         }
     }
 }
