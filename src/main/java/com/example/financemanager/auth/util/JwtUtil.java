@@ -38,7 +38,7 @@ public class JwtUtil {
 
         Cookie cookie = new Cookie("token", token);
         cookie.setHttpOnly(true);
-        cookie.setSecure(false); // Set to false only for local testing, when set to true https is required
+        cookie.setSecure(false);
         cookie.setPath("/");
         cookie.setMaxAge((int) (expirationTime / 1000));
         return cookie;

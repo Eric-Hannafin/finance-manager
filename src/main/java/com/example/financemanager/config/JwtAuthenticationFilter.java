@@ -39,6 +39,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         LOGGER.info("Incoming request {} {} {}", request.getServerName(), request.getRequestURI(), request.getMethod());
 
+        String path = request.getRequestURI();
+
+        //TODO Figure out why this is needed? Should this not be skipped if the path is to login is excluded in the security context
+        if (path.startsWith("/api/auth/login") || path.startsWith("/api/auth/register")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         try {
             String token = extractToken(request);
             if (StringUtils.hasText(token) && jwtUtil.validateToken(token)) {
@@ -52,6 +60,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     return;
                 }
+            } else {
+                LOGGER.error("Invalid or missing token");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
             }
         } catch (AuthenticationServiceException ex) {
             SecurityContextHolder.clearContext();
