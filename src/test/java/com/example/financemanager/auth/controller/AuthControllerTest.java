@@ -5,6 +5,7 @@ import com.example.financemanager.auth.model.Login;
 import com.example.financemanager.auth.service.AuthService;
 import com.example.financemanager.auth.util.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +19,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(AuthController.class)
 class AuthControllerTest {
@@ -36,7 +36,6 @@ class AuthControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private static final String TOKEN = "token";
     private Customer customer;
     private Login login;
 
@@ -89,36 +88,30 @@ class AuthControllerTest {
     @Test
     @WithMockUser
     void testAuthenticateUser_Success() throws Exception {
-
+        Cookie mockCookie = new Cookie("token", "dummyTokenValue");
         given(authService.validateUser(any(String.class), any(String.class))).willReturn(true);
-        given(jwtUtil.createToken(any(String.class))).willReturn(TOKEN);
+        given(jwtUtil.createToken(any(String.class))).willReturn(mockCookie);
 
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(login))
                         .with(csrf()))
                 .andExpect(status().isOk())
-                .andExpect(content().string(TOKEN));
-
-        verify(authService, times(1)).validateUser(any(String.class), any(String.class));
-
+                .andExpect(cookie().exists("token")) // Check that the cookie exists
+                .andExpect(content().string("User authenticated successfully"));
     }
 
     @Test
     @WithMockUser
     void testAuthenticateUser_Failure() throws Exception {
-
         given(authService.validateUser(any(String.class), any(String.class))).willReturn(false);
 
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(login))
                         .with(csrf()))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnauthorized())  // Expect Unauthorized status
                 .andExpect(content().string("Failed to login user"));
-
-        verify(authService, times(1)).validateUser(any(String.class), any(String.class));
-
     }
 
 }

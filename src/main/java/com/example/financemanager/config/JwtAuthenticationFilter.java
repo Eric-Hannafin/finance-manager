@@ -5,6 +5,7 @@ import com.example.financemanager.auth.model.Customer;
 import com.example.financemanager.auth.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
@@ -43,7 +44,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (StringUtils.hasText(token) && jwtUtil.validateToken(token)) {
                 String username = jwtUtil.extractUsername(token);
                 Customer customer = authRepository.findByUsernameOrEmail(username);
-
                 if (customer != null) {
                     Authentication auth = new UsernamePasswordAuthenticationToken(customer.getUserName(), customer, null);
                     SecurityContextHolder.getContext().setAuthentication(auth);
@@ -63,9 +63,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String extractToken(HttpServletRequest request) {
-        String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
-        if (StringUtils.hasText(bearerToken)) {
-            return bearerToken.substring(BEARER_PREFIX);
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("token".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
         }
         return null;
     }

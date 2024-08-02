@@ -21,7 +21,6 @@ public class AuthService {
     public void registerUser(Customer userDetails) {
         String encodedPassword = bCryptPasswordEncoder.encode(userDetails.getPassword());
         userDetails.setPassword(encodedPassword);
-
         authRepository.save(userDetails);
     }
 
