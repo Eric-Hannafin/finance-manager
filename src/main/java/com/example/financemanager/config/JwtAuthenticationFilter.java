@@ -22,11 +22,10 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
-    public static final String AUTHORIZATION_HEADER = "Authorization";
-    public static final int BEARER_PREFIX = 7;
 
     private final JwtUtil jwtUtil;
     private final AuthRepository authRepository;
+    public boolean enableFilter = false;
 
     public JwtAuthenticationFilter(JwtUtil jwtUtil, AuthRepository authRepository) {
         this.jwtUtil = jwtUtil;
@@ -39,37 +38,40 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         LOGGER.info("Incoming request {} {} {}", request.getServerName(), request.getRequestURI(), request.getMethod());
 
-        String path = request.getRequestURI();
+        if (enableFilter) {
 
-        //TODO Figure out why this is needed? Should this not be skipped if the path is to login is excluded in the security context
-        if (path.startsWith("/api/auth/login") || path.startsWith("/api/auth/register")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+            String path = request.getRequestURI();
 
-        try {
-            String token = extractToken(request);
-            if (StringUtils.hasText(token) && jwtUtil.validateToken(token)) {
-                String username = jwtUtil.extractUsername(token);
-                Customer customer = authRepository.findByUsernameOrEmail(username);
-                if (customer != null) {
-                    Authentication auth = new UsernamePasswordAuthenticationToken(customer.getUserName(), customer, null);
-                    SecurityContextHolder.getContext().setAuthentication(auth);
+            //TODO Figure out why this is needed? I thought this filter would be excluded for the login and
+            // register as they are marked as excluded in WebSecurityConfig
+            if (path.startsWith("/api/auth/login") || path.startsWith("/api/auth/register")) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+            try {
+                String token = extractToken(request);
+                if (StringUtils.hasText(token) && jwtUtil.validateToken(token)) {
+                    String username = jwtUtil.extractUsername(token);
+                    Customer customer = authRepository.findByUsernameOrEmail(username);
+                    if (customer != null) {
+                        Authentication auth = new UsernamePasswordAuthenticationToken(customer.getUserName(), customer, null);
+                        SecurityContextHolder.getContext().setAuthentication(auth);
+                    } else {
+                        LOGGER.error("User not found with username or email: {}", username);
+                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        return;
+                    }
                 } else {
-                    LOGGER.error("User not found with username or email: {}", username);
+                    LOGGER.error("Invalid or missing token");
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     return;
                 }
-            } else {
-                LOGGER.error("Invalid or missing token");
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            } catch (AuthenticationServiceException ex) {
+                SecurityContextHolder.clearContext();
+                LOGGER.error("Authentication request for failed: {}", ex.getMessage());
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage());
                 return;
             }
-        } catch (AuthenticationServiceException ex) {
-            SecurityContextHolder.clearContext();
-            LOGGER.error("Authentication request for failed: {}", ex.getMessage());
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage());
-            return;
         }
         filterChain.doFilter(request, response);
     }

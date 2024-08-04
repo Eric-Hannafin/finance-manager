@@ -42,13 +42,24 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<String> authenticateUser(@RequestBody Login login, HttpServletResponse response) {
+        final long accessTokenExpirationTime = System.currentTimeMillis() + 900_000; // 15 minutes
+        final long refreshTokenExpirationTime = System.currentTimeMillis() + 604800; // 7 days
         boolean isAuthenticated = authService.validateUser(login.getUsernameOrEmail(), login.getPassword());
         if (isAuthenticated) {
-            Cookie cookie = jwtUtil.createToken(login.getUsernameOrEmail());
-            response.addCookie(cookie);
+            Cookie accessToken = jwtUtil.createToken(login.getUsernameOrEmail(), accessTokenExpirationTime);
+            Cookie refreshToken = jwtUtil.createToken(login.getUsernameOrEmail(), refreshTokenExpirationTime);
+            response.addCookie(accessToken);
+            response.addCookie(refreshToken);
             return ResponseEntity.ok().body("User authenticated successfully");
         } else {
             return ResponseEntity.status(401).body("Failed to login user");
         }
     }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<String> refreshUserSession(@RequestBody Login login, HttpServletResponse response) {
+        final long accessTokenExpirationTime = System.currentTimeMillis() + 900_000; // 15 minutes
+        return null;
+    }
+
 }

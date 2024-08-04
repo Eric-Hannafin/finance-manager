@@ -29,18 +29,17 @@ public class JwtUtil {
         return decodedJWT.getSubject();
     }
 
-    public Cookie createToken(String userName) {
-        long expirationTime = System.currentTimeMillis() + 900_000; // 15 minutes
+    public Cookie createToken(String userName, long refreshTokenExpirationTime) {
         String token = JWT.create()
                 .withSubject(userName)
-                .withExpiresAt(new Date(expirationTime))
+                .withExpiresAt(new Date(refreshTokenExpirationTime))
                 .sign(Algorithm.HMAC256(secret));
 
         Cookie cookie = new Cookie("token", token);
         cookie.setHttpOnly(true);
         cookie.setSecure(false);
         cookie.setPath("/");
-        cookie.setMaxAge((int) (expirationTime / 1000));
+        cookie.setMaxAge((int) (refreshTokenExpirationTime / 1000));
         return cookie;
     }
 
