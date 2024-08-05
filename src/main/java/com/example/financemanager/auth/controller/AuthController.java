@@ -1,7 +1,8 @@
 package com.example.financemanager.auth.controller;
 
 import com.example.financemanager.auth.model.Customer;
-import com.example.financemanager.auth.model.Login;
+import com.example.financemanager.auth.model.LoginRequest;
+import com.example.financemanager.auth.model.RefreshRequest;
 import com.example.financemanager.auth.service.AuthService;
 import com.example.financemanager.auth.util.JwtUtil;
 import jakarta.servlet.http.Cookie;
@@ -41,7 +42,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> authenticateUser(@RequestBody Login login, HttpServletResponse response) {
+    public ResponseEntity<String> authenticateUser(@RequestBody LoginRequest login, HttpServletResponse response) {
         final long accessTokenExpirationTime = System.currentTimeMillis() + 900_000; // 15 minutes
         final long refreshTokenExpirationTime = System.currentTimeMillis() + 604800; // 7 days
         boolean isAuthenticated = authService.validateUser(login.getUsernameOrEmail(), login.getPassword());
@@ -57,7 +58,7 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<String> refreshUserSession(@RequestBody Login login, HttpServletResponse response) {
+    public ResponseEntity<String> refreshUserSession(RefreshRequest refresh, HttpServletResponse response) {
         final long accessTokenExpirationTime = System.currentTimeMillis() + 900_000; // 15 minutes
         return null;
     }

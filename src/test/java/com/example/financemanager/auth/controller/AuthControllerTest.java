@@ -1,7 +1,7 @@
 package com.example.financemanager.auth.controller;
 
 import com.example.financemanager.auth.model.Customer;
-import com.example.financemanager.auth.model.Login;
+import com.example.financemanager.auth.model.LoginRequest;
 import com.example.financemanager.auth.service.AuthService;
 import com.example.financemanager.auth.util.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,7 +37,7 @@ class AuthControllerTest {
     private ObjectMapper objectMapper;
 
     private Customer customer;
-    private Login login;
+    private LoginRequest login;
 
     @BeforeEach
     void setUp() {
@@ -46,7 +46,7 @@ class AuthControllerTest {
         customer.setPassword("password");
         customer.setEmail("email");
 
-        login = new Login();
+        login = new LoginRequest();
         login.setUsernameOrEmail("testUserName");
         login.setPassword("testPassword");
     }
