@@ -21,6 +21,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthController.class);
+    private static final String ACCESS_TOKEN = "accessToken";
+    private static final String REFRESH_TOKEN = "refreshToken";
+
 
     private final AuthService authService;
     private final JwtUtil jwtUtil;
@@ -43,12 +46,12 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<String> authenticateUser(@RequestBody LoginRequest login, HttpServletResponse response) {
-        final long accessTokenExpirationTime = System.currentTimeMillis() + 900_000; // 15 minutes
-        final long refreshTokenExpirationTime = System.currentTimeMillis() + 604800; // 7 days
+        final long accessTokenExpirationTime = System.currentTimeMillis() + 900_000;
+        final long refreshTokenExpirationTime = System.currentTimeMillis() + 604800;
         boolean isAuthenticated = authService.validateUser(login.getUsernameOrEmail(), login.getPassword());
         if (isAuthenticated) {
-            Cookie accessToken = jwtUtil.createToken(login.getUsernameOrEmail(), accessTokenExpirationTime);
-            Cookie refreshToken = jwtUtil.createToken(login.getUsernameOrEmail(), refreshTokenExpirationTime);
+            Cookie accessToken = jwtUtil.createToken(login.getUsernameOrEmail(), accessTokenExpirationTime, ACCESS_TOKEN);
+            Cookie refreshToken = jwtUtil.createToken(login.getUsernameOrEmail(), refreshTokenExpirationTime, REFRESH_TOKEN);
             response.addCookie(accessToken);
             response.addCookie(refreshToken);
             return ResponseEntity.ok().body("User authenticated successfully");
@@ -59,7 +62,7 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<String> refreshUserSession(RefreshRequest refresh, HttpServletResponse response) {
-        final long accessTokenExpirationTime = System.currentTimeMillis() + 900_000; // 15 minutes
+        long accessTokenExpirationTime = System.currentTimeMillis() + 900_000;
         return null;
     }
 

@@ -29,13 +29,13 @@ public class JwtUtil {
         return decodedJWT.getSubject();
     }
 
-    public Cookie createToken(String userName, long refreshTokenExpirationTime) {
+    public Cookie createToken(String userName, long refreshTokenExpirationTime, String cookieName) {
         String token = JWT.create()
                 .withSubject(userName)
                 .withExpiresAt(new Date(refreshTokenExpirationTime))
                 .sign(Algorithm.HMAC256(secret));
 
-        Cookie cookie = new Cookie("token", token);
+        Cookie cookie = new Cookie(cookieName, token);
         cookie.setHttpOnly(true);
         cookie.setSecure(false);
         cookie.setPath("/");

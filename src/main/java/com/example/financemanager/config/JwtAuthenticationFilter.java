@@ -25,7 +25,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final AuthRepository authRepository;
-    public boolean enableFilter = false;
+    public boolean enableFilter = true;
 
     public JwtAuthenticationFilter(JwtUtil jwtUtil, AuthRepository authRepository) {
         this.jwtUtil = jwtUtil;
