@@ -2,10 +2,10 @@ package com.example.financemanager.auth.controller;
 
 import com.example.financemanager.auth.model.Customer;
 import com.example.financemanager.auth.model.LoginRequest;
-import com.example.financemanager.auth.model.RefreshRequest;
 import com.example.financemanager.auth.service.AuthService;
 import com.example.financemanager.auth.util.JwtUtil;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,9 +61,18 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<String> refreshUserSession(RefreshRequest refresh, HttpServletResponse response) {
-        long accessTokenExpirationTime = System.currentTimeMillis() + 900_000;
-        return null;
+    public ResponseEntity<String> refreshUserSession(HttpServletRequest request, HttpServletResponse response) {
+        Cookie[] cookies = request.getCookies();
+        for (Cookie cookie : cookies) {
+            if (REFRESH_TOKEN.equals(cookie.getName())) {
+                if (jwtUtil.validateToken(cookie.getValue())) {
+                    long accessTokenExpirationTime = System.currentTimeMillis() + 900_000;
+                    Cookie accessToken = jwtUtil.createToken("userName", accessTokenExpirationTime, ACCESS_TOKEN);
+                    response.addCookie(accessToken);
+                    return ResponseEntity.ok().body("Refresh token accepted and new access token provided");
+                }
+            }
+        }
+        return ResponseEntity.status(401).body("Refresh token accepted and new access token provided");
     }
-
 }
