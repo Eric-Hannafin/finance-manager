@@ -97,7 +97,7 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(login))
                         .with(csrf()))
                 .andExpect(status().isOk())
-                .andExpect(cookie().exists("token")) // Check that the cookie exists
+                .andExpect(cookie().exists("token"))
                 .andExpect(content().string("User authenticated successfully"));
     }
 
@@ -110,7 +110,7 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(login))
                         .with(csrf()))
-                .andExpect(status().isUnauthorized())  // Expect Unauthorized status
+                .andExpect(status().isUnauthorized())
                 .andExpect(content().string("Failed to login user"));
     }
 
