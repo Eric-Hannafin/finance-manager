@@ -50,8 +50,8 @@ public class AuthController {
         final long refreshTokenExpirationTime = System.currentTimeMillis() + 604800;
         boolean isAuthenticated = authService.validateUser(login.getUsernameOrEmail(), login.getPassword());
         if (isAuthenticated) {
-            Cookie accessToken = jwtUtil.createToken(login.getUsernameOrEmail(), accessTokenExpirationTime, ACCESS_TOKEN);
-            Cookie refreshToken = jwtUtil.createToken(login.getUsernameOrEmail(), refreshTokenExpirationTime, REFRESH_TOKEN);
+            Cookie accessToken = jwtUtil.createToken(accessTokenExpirationTime, ACCESS_TOKEN);
+            Cookie refreshToken = jwtUtil.createToken(refreshTokenExpirationTime, REFRESH_TOKEN);
             response.addCookie(accessToken);
             response.addCookie(refreshToken);
             return ResponseEntity.ok().body("User authenticated successfully");
@@ -67,7 +67,7 @@ public class AuthController {
             if (REFRESH_TOKEN.equals(cookie.getName())) {
                 if (jwtUtil.validateToken(cookie.getValue())) {
                     long accessTokenExpirationTime = System.currentTimeMillis() + 900_000;
-                    Cookie accessToken = jwtUtil.createToken("userName", accessTokenExpirationTime, ACCESS_TOKEN);
+                    Cookie accessToken = jwtUtil.createToken(accessTokenExpirationTime, ACCESS_TOKEN);
                     response.addCookie(accessToken);
                     return ResponseEntity.ok().body("Refresh token accepted and new access token provided");
                 }

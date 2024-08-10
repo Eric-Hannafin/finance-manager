@@ -90,7 +90,7 @@ class AuthControllerTest {
     void testAuthenticateUser_Success() throws Exception {
         Cookie mockCookie = new Cookie("token", "dummyTokenValue");
         given(authService.validateUser(any(String.class), any(String.class))).willReturn(true);
-        given(jwtUtil.createToken(any(String.class), any(long.class), any(String.class))).willReturn(mockCookie);
+        given(jwtUtil.createToken(any(long.class), any(String.class))).willReturn(mockCookie);
 
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)

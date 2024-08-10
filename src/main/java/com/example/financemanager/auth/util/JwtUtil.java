@@ -29,9 +29,8 @@ public class JwtUtil {
         return decodedJWT.getSubject();
     }
 
-    public Cookie createToken(String userName, long refreshTokenExpirationTime, String cookieName) {
+    public Cookie createToken(long refreshTokenExpirationTime, String cookieName) {
         String token = JWT.create()
-                .withSubject(userName)
                 .withExpiresAt(new Date(refreshTokenExpirationTime))
                 .sign(Algorithm.HMAC256(secret));
 

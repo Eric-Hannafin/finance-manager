@@ -44,7 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             //TODO Figure out why this is needed? I thought this filter would be excluded for the login and
             // register as they are marked as excluded in WebSecurityConfig
-            if (path.startsWith("/api/auth/login") || path.startsWith("/api/auth/register")) {
+            if (path.startsWith("/api/auth/login") || path.startsWith("/api/auth/register") || path.startsWith("/api/auth/refresh")) {
                 filterChain.doFilter(request, response);
                 return;
             }
