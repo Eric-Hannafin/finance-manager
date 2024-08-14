@@ -32,7 +32,7 @@ class AuthControllerTest {
 
     @MockBean
     private JwtUtil jwtUtil;
-
+    
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -112,6 +112,43 @@ class AuthControllerTest {
                         .with(csrf()))
                 .andExpect(status().isUnauthorized())
                 .andExpect(content().string("Failed to login user"));
+    }
+
+    @Test
+    @WithMockUser
+    void testRefreshToken_InvalidToken() throws Exception {
+        Cookie mockRefreshToken = new Cookie("refreshToken", "invalid-refresh-token");
+        given(jwtUtil.validateToken("valid-refresh-token")).willReturn(false);
+
+        mockMvc.perform(post("/auth/refresh")
+                        .cookie(mockRefreshToken)
+                        .with(csrf()))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().string("Failed to validate refresh token"));
+    }
+
+    @Test
+    @WithMockUser
+    void testRefreshToken_validToken() throws Exception {
+        Cookie mockRefreshToken = new Cookie("refreshToken", "valid-refresh-token");
+        Cookie mockAccessToken = new Cookie("accessToken", "valid-refresh-token");
+        given(jwtUtil.validateToken("valid-refresh-token")).willReturn(true);
+        given(jwtUtil.createToken(anyLong(), anyString())).willReturn(mockAccessToken);
+
+        mockMvc.perform(post("/auth/refresh")
+                        .cookie(mockRefreshToken)
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Refresh token accepted and new access token provided"));
+    }
+
+    @Test
+    @WithMockUser
+    void testRefreshToken_NoToken() throws Exception {
+        mockMvc.perform(post("/auth/refresh")
+                        .with(csrf()))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().string("No cookies present. Unable to refresh token."));
     }
 
 }

@@ -63,6 +63,9 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<String> refreshUserSession(HttpServletRequest request, HttpServletResponse response) {
         Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            return ResponseEntity.status(401).body("No cookies present. Unable to refresh token.");
+        }
         for (Cookie cookie : cookies) {
             if (REFRESH_TOKEN.equals(cookie.getName())) {
                 if (jwtUtil.validateToken(cookie.getValue())) {
@@ -73,6 +76,6 @@ public class AuthController {
                 }
             }
         }
-        return ResponseEntity.status(401).body("Refresh token accepted and new access token provided");
+        return ResponseEntity.status(401).body("Failed to validate refresh token");
     }
 }
