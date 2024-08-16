@@ -11,8 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,7 +35,6 @@ public class AuthServiceTest {
 
     @Test
     void registerUser_Success() {
-
         // Given
         String encodedPassword = "encodedPassword";
         when(mockPasswordEncoder.encode(mockCustomer.getPassword())).thenReturn(encodedPassword);
@@ -52,7 +50,6 @@ public class AuthServiceTest {
 
     @Test
     void registerUser_nullPassword_ShouldThrowException() {
-
         // Given
         mockCustomer.setPassword(null);
 
@@ -60,6 +57,49 @@ public class AuthServiceTest {
         assertThrows(CustomerRegistrationException.class, () -> underTest.registerUser(mockCustomer));
 
         verify(mockAuthRepository, never()).save(mockCustomer);
+    }
+
+    @Test
+    void validateUser_Success() {
+        // Given
+        when(mockAuthRepository.findByUsernameOrEmail(anyString())).thenReturn(mockCustomer);
+        when(mockPasswordEncoder.matches(anyString(), anyString())).thenReturn(true);
+
+        // When
+        boolean result = underTest.validateUser("testUsername", "testPassword");
+
+        // Then
+        verify(mockAuthRepository).findByUsernameOrEmail(anyString());
+        verify(mockPasswordEncoder).matches(anyString(), anyString());
+        assertTrue(true);
+    }
+
+    @Test
+    void validateUser_CustomerNotFound() {
+        // Given
+        when(mockAuthRepository.findByUsernameOrEmail(anyString())).thenReturn(null);
+
+        // When
+        boolean result = underTest.validateUser("testUsername", "testPassword");
+
+        // Then
+        verify(mockAuthRepository).findByUsernameOrEmail(anyString());
+        assertFalse(result);
+    }
+
+    @Test
+    void validateUser_PasswordNotMatching() {
+        // Given
+        when(mockAuthRepository.findByUsernameOrEmail(anyString())).thenReturn(mockCustomer);
+        when(mockPasswordEncoder.matches(anyString(), anyString())).thenReturn(false);
+
+        // When
+        boolean result = underTest.validateUser("testUsername", "testPassword");
+
+        // Then
+        verify(mockAuthRepository).findByUsernameOrEmail(anyString());
+        verify(mockPasswordEncoder).matches(anyString(), anyString());
+        assertFalse(result);
     }
 
     private Customer populateCustomer() {
