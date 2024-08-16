@@ -23,8 +23,7 @@ public class AuthController {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthController.class);
     private static final String ACCESS_TOKEN = "accessToken";
     private static final String REFRESH_TOKEN = "refreshToken";
-
-
+    
     private final AuthService authService;
     private final JwtUtil jwtUtil;
 

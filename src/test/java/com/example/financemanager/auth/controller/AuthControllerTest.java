@@ -54,9 +54,10 @@ class AuthControllerTest {
     @Test
     @WithMockUser
     void testRegisterUser_Success() throws Exception {
-
+        // Given
         doNothing().when(mockAuthService).registerUser(any(Customer.class));
 
+        // When & Then
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(customer))
@@ -71,9 +72,10 @@ class AuthControllerTest {
     @Test
     @WithMockUser
     void testRegisterUser_Failure() throws Exception {
-
+        // Given
         doThrow(new RuntimeException()).when(mockAuthService).registerUser(any(Customer.class));
 
+        // When & Then
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(customer))
@@ -88,10 +90,12 @@ class AuthControllerTest {
     @Test
     @WithMockUser
     void testAuthenticateUser_Success() throws Exception {
+        // Given
         Cookie mockCookie = new Cookie("token", "dummyTokenValue");
         given(mockAuthService.validateUser(any(String.class), any(String.class))).willReturn(true);
         given(mockJwtUtil.createToken(any(long.class), any(String.class))).willReturn(mockCookie);
 
+        // When & Then
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(login))
@@ -104,8 +108,10 @@ class AuthControllerTest {
     @Test
     @WithMockUser
     void testAuthenticateUser_Failure() throws Exception {
+        // Given
         given(mockAuthService.validateUser(any(String.class), any(String.class))).willReturn(false);
 
+        // When & Then
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(login))
@@ -117,9 +123,11 @@ class AuthControllerTest {
     @Test
     @WithMockUser
     void testRefreshToken_InvalidToken() throws Exception {
+        // Given
         Cookie mockRefreshToken = new Cookie("refreshToken", "invalid-refresh-token");
         given(mockJwtUtil.validateToken("valid-refresh-token")).willReturn(false);
 
+        // When & Then
         mockMvc.perform(post("/auth/refresh")
                         .cookie(mockRefreshToken)
                         .with(csrf()))
@@ -130,11 +138,13 @@ class AuthControllerTest {
     @Test
     @WithMockUser
     void testRefreshToken_validToken() throws Exception {
+        // Given
         Cookie mockRefreshToken = new Cookie("refreshToken", "valid-refresh-token");
         Cookie mockAccessToken = new Cookie("accessToken", "valid-refresh-token");
         given(mockJwtUtil.validateToken("valid-refresh-token")).willReturn(true);
         given(mockJwtUtil.createToken(anyLong(), anyString())).willReturn(mockAccessToken);
 
+        // When & Then
         mockMvc.perform(post("/auth/refresh")
                         .cookie(mockRefreshToken)
                         .with(csrf()))
@@ -145,6 +155,7 @@ class AuthControllerTest {
     @Test
     @WithMockUser
     void testRefreshToken_NoToken() throws Exception {
+        // When & Then
         mockMvc.perform(post("/auth/refresh")
                         .with(csrf()))
                 .andExpect(status().isUnauthorized())
