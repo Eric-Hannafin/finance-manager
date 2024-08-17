@@ -37,20 +37,20 @@ class TransactionControllerTest {
 
     @Test
     @WithMockUser
-    void testAddTransaction() throws Exception {
+    void testAddTransaction_Success() throws Exception {
+        // Given
         Transaction transaction = new Transaction();
-
         transaction.setType("DEBIT");
         transaction.setAmount(new java.math.BigDecimal("100.00"));
         transaction.setDescription("Test Transaction");
-
         when(transactionRepository.save(any(Transaction.class))).thenReturn(transaction);
 
+        // When & Then
         mockMvc.perform(post("/transactions")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(transaction))
                         .with(csrf()))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.type").value(transaction.getType()))
                 .andExpect(jsonPath("$.amount").value(AMOUNT))
                 .andExpect(jsonPath("$.description").value("Test Transaction"));
@@ -60,13 +60,14 @@ class TransactionControllerTest {
 
     @Test
     @WithMockUser
-    void testGetAllTransactions() throws Exception {
+    void testGetAllTransactions_Success() throws Exception {
+        // Given
         Transaction transaction1 = new Transaction();
         Transaction transaction2 = new Transaction();
         List<Transaction> transactions = Arrays.asList(transaction1, transaction2);
-
         when(transactionRepository.findAll()).thenReturn(transactions);
 
+        // When & Then
         mockMvc.perform(get("/transactions"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(transactions.size()));
