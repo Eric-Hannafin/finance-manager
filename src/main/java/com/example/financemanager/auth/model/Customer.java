@@ -26,5 +26,11 @@ public class Customer {
     private String email;
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
+    @Column(name = "last_login")
+    private LocalDateTime lastLogin;
+    @Column(name = "roles")
+    private String roles;
+    @Column(name = "refresh_token")
+    private String refreshToken;
 
 }

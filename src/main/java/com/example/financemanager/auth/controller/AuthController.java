@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
+
 
 @RestController
 @RequestMapping("/auth")
@@ -23,13 +25,15 @@ public class AuthController {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthController.class);
     private static final String ACCESS_TOKEN = "accessToken";
     private static final String REFRESH_TOKEN = "refreshToken";
-    
+
     private final AuthService authService;
     private final JwtUtil jwtUtil;
+    private final AuthRepository authRepository;
 
-    public AuthController(AuthService authService, JwtUtil jwtUtil) {
+    public AuthController(AuthService authService, JwtUtil jwtUtil, AuthRepository authRepository) {
         this.authService = authService;
         this.jwtUtil = jwtUtil;
+        this.authRepository = authRepository;
     }
 
     @PostMapping("/register")
@@ -51,6 +55,7 @@ public class AuthController {
         if (isAuthenticated) {
             Cookie accessToken = jwtUtil.createToken(accessTokenExpirationTime, ACCESS_TOKEN);
             Cookie refreshToken = jwtUtil.createToken(refreshTokenExpirationTime, REFRESH_TOKEN);
+            updateCustomerInformation(login.getUsernameOrEmail(), refreshToken);
             response.addCookie(accessToken);
             response.addCookie(refreshToken);
             return ResponseEntity.ok().body("User authenticated successfully");
@@ -66,15 +71,22 @@ public class AuthController {
             return ResponseEntity.status(401).body("No cookies present. Unable to refresh token.");
         }
         for (Cookie cookie : cookies) {
-            if (REFRESH_TOKEN.equals(cookie.getName())) {
-                if (jwtUtil.validateToken(cookie.getValue())) {
-                    long accessTokenExpirationTime = System.currentTimeMillis() + 900_000;
-                    Cookie accessToken = jwtUtil.createToken(accessTokenExpirationTime, ACCESS_TOKEN);
-                    response.addCookie(accessToken);
-                    return ResponseEntity.ok().body("Refresh token accepted and new access token provided");
-                }
+            if (REFRESH_TOKEN.equals(cookie.getName()) && jwtUtil.validateToken(cookie.getValue())) {
+                long accessTokenExpirationTime = System.currentTimeMillis() + 900_000;
+                Cookie accessToken = jwtUtil.createToken(accessTokenExpirationTime, ACCESS_TOKEN);
+                response.addCookie(accessToken);
+                return ResponseEntity.ok().body("Refresh token accepted and new access token provided");
             }
         }
         return ResponseEntity.status(401).body("Failed to validate refresh token");
+    }
+
+    private void updateCustomerInformation(String customerValue, Cookie refreshToken) {
+        Customer customer = authRepository.findByUsernameOrEmail(customerValue);
+        if (customer != null) {
+            customer.setRefreshToken(refreshToken.getValue());
+            customer.setLastLogin(LocalDateTime.now());
+            authRepository.save(customer);
+        }
     }
 }
